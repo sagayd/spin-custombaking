@@ -1,0 +1,92 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+    "aws_region": "us-east-2",
+    "aws_vpc_id": "vpc-09ab127827196a729",
+    "aws_subnet_id": "subnet-03a52edbefd2dd009",
+    "aws_instance_type": "t2.micro",
+    "aws_source_ami": "ami-0eea504f45ef7a8f7",
+    "aws_target_ami": "packer-demo",
+    "aws_security_group": "",
+    "aws_associate_public_ip_address": "true",
+    "aws_ena_support": "false",
+    "aws_spot_price": "0",
+    "aws_spot_price_auto_product": "",
+    "aws_userdata_file": "scripts/aws-windows.userdata",
+    "appversion": "",
+    "build_host": "",
+    "repository": "",
+    "package_type": "",
+    "packages": "",
+    "upgrade": "",
+    "configDir": "./",
+    "chocolateyVersion": "",
+    "aws_ssh_username": "ubuntu",
+    "temporary_key_pair_type": "rsa",
+    "aws_ssh_keypair_name": "packer-useast2",
+    "aws_ssh_private_key_file": "/home/saga/.ssh/packer-useast2.pem"
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `aws_region`}}",
+      "vpc_id": "{{user `aws_vpc_id`}}",
+      "subnet_id": "{{user `aws_subnet_id`}}",
+
+      "instance_type": "{{user `aws_instance_type`}}",
+      "source_ami": "{{user `aws_source_ami`}}",
+      "ami_name": "{{user `aws_target_ami` | clean_resource_name}}-{{timestamp}}",
+      "associate_public_ip_address": "{{user `aws_associate_public_ip_address`}}",
+      "security_group_id": "{{user `aws_security_group`}}",
+
+      "ena_support": "{{user `aws_ena_support`}}",
+      "spot_price": "{{user `aws_spot_price`}}",
+      "spot_price_auto_product": "{{user `aws_spot_price_auto_product`}}",
+
+      "tags": {
+        "appversion": "{{user `appversion`}}",
+        "build_host": "{{user `build_host`}}",
+        "build_info_url": "{{user `build_info_url`}}"
+      },
+      "run_tags": {"Packages": "{{user `packages`}}"},
+      "ssh_username": "{{user `aws_ssh_username`}}",
+      "ssh_keypair_name": "{{user `aws_ssh_keypair_name`}}",
+      "ssh_private_key_file": "{{user `aws_ssh_private_key_file`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "script": "prePkrPullFiles.sh"
+    },
+    {
+      "type": "file",
+      "destination": "/tmp/files2deploy/",
+      "source": "/tmp/files2deploy/"
+    },
+    {
+      "type": "file",
+      "source": "/opt/gitwork/demo-app/build/libs/sampleapp-0.0.1.jar",
+      "destination": "/tmp/"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get install -y git wget curl",
+        "sudo ssh-keyscan github.com >> ~/.ssh/known_hosts",
+        "eval `ssh-agent`",
+        "echo This is from remote machine $HOSTNAME",
+        "pwd",
+	"touch /tmp/packer_dummy.txt"
+      ]
+    },
+    {
+      "type": "breakpoint",
+      "note": "Wait for you to delete"
+    }
+  ]
+}
