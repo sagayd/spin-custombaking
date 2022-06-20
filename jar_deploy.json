@@ -66,6 +66,7 @@
     {
       "type": "shell",
       "inline": [
+        "#Note: All directotires refered in the type:file's source:dir-val should be existing before packer is invoked",
         "mkdir -p /tmp/files2deploy/",
         "touch /tmp/packer_test.txt"
       ]
@@ -73,11 +74,11 @@
     {
       "type": "file",
       "destination": "/tmp/files2deploy/",
-      "source": "/tmp/files2deploy/"
+      "source": "./files2deploy/"
     },
     {
       "type": "file",
-      "source": "/opt/gitwork/demo-app/build/libs/sampleapp-0.0.1.jar",
+      "source": "./files2deploy/sampleapp.jar",
       "destination": "/tmp/"
     },
     {
