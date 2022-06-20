@@ -1,1 +1,1 @@
-packer build jar.json
+packer build deploy_jar.json
