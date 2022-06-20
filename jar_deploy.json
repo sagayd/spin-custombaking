@@ -22,10 +22,7 @@
     "upgrade": "",
     "configDir": "./",
     "chocolateyVersion": "",
-    "aws_ssh_username": "ubuntu",
-    "temporary_key_pair_type": "rsa",
-    "aws_ssh_keypair_name": "packer-useast2",
-    "aws_ssh_private_key_file": "/home/saga/.ssh/packer-useast2.pem"
+    "aws_ssh_username": "ubuntu"
   },
 
   "builders": [
@@ -47,21 +44,31 @@
       "spot_price": "{{user `aws_spot_price`}}",
       "spot_price_auto_product": "{{user `aws_spot_price_auto_product`}}",
 
+      "ssh_username": "{{user `aws_ssh_username`}}",
+      "ssh_pty": true,
+
       "tags": {
         "appversion": "{{user `appversion`}}",
         "build_host": "{{user `build_host`}}",
         "build_info_url": "{{user `build_info_url`}}"
       },
-      "run_tags": {"Packages": "{{user `packages`}}"},
-      "ssh_username": "{{user `aws_ssh_username`}}",
-      "ssh_keypair_name": "{{user `aws_ssh_keypair_name`}}",
-      "ssh_private_key_file": "{{user `aws_ssh_private_key_file`}}"
+      "run_tags": {"Packages": "{{user `packages`}}"}
     }
   ],
   "provisioners": [
     {
       "type": "shell-local",
-      "script": "prePkrPullFiles.sh"
+       "inline": [
+          "chmod +x *.sh",
+	  "./prePkrPullFiles.sh"
+        ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir -p /tmp/files2deploy/",
+        "touch /tmp/packer_test.txt"
+      ]
     },
     {
       "type": "file",
@@ -79,14 +86,10 @@
         "sudo apt-get install -y git wget curl",
         "sudo ssh-keyscan github.com >> ~/.ssh/known_hosts",
         "eval `ssh-agent`",
-        "echo This is from remote machine $HOSTNAME",
+        "echo This is from remote machine `hostname`",
         "pwd",
 	"touch /tmp/packer_dummy.txt"
       ]
-    },
-    {
-      "type": "breakpoint",
-      "note": "Wait for you to delete"
     }
   ]
 }
